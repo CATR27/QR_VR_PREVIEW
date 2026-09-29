@@ -43,3 +43,5 @@ next-env.d.ts
 
 # fuentes 3D originales (pesadas, no se publican)
 /assets-src/
+
+.vercel
