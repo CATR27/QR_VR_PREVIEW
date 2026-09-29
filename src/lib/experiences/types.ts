@@ -17,6 +17,23 @@ export const environmentSchema = z.object({
   credit: z.string(),
 });
 
+export const prizeSchema = z.object({
+  id: z.string(),
+  emoji: z.string(),
+  title: z.string(),
+  description: z.string().optional(),
+  /** Peso relativo en el sorteo (no es un stock real). */
+  weight: z.number().positive(),
+});
+
+export const gameSchema = z.object({
+  enabled: z.boolean(),
+  /** Milisegundos que hay que mantener presionado para reventar el modelo. */
+  holdMs: z.number().int().min(300).max(5000),
+  codePrefix: z.string().regex(/^[A-Z0-9]{1,6}$/),
+  prizes: z.array(prizeSchema).min(1),
+});
+
 export const experienceSchema = z.object({
   id: z.string(),
   slug: slugSchema,
@@ -36,6 +53,7 @@ export const experienceSchema = z.object({
     /** USDZ explícito para iOS; si falta, model-viewer lo genera desde el GLB. */
     usdzUrl: z.string().nullable(),
   }),
+  game: gameSchema.optional(),
   autoRotate: z.boolean(),
   active: z.boolean(),
   assetVersion: z.string(),
@@ -44,3 +62,5 @@ export const experienceSchema = z.object({
 export type Experience = z.infer<typeof experienceSchema>;
 export type ExperienceEnvironment = z.infer<typeof environmentSchema>;
 export type ExperienceAR = Experience["ar"];
+export type ExperienceGame = z.infer<typeof gameSchema>;
+export type Prize = z.infer<typeof prizeSchema>;

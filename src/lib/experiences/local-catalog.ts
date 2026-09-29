@@ -22,6 +22,24 @@ const rawCatalog: unknown[] = [
       allowScaling: true,
       usdzUrl: null,
     },
+    // Premios de ejemplo: reemplazar por los reales del evento.
+    game: {
+      enabled: true,
+      holdMs: 1000,
+      codePrefix: "HW",
+      prizes: [
+        { id: "dulces", emoji: "🍬", title: "Bolsa de dulces", weight: 50 },
+        { id: "calcomania", emoji: "👻", title: "Calcomanía de Halloween", weight: 30 },
+        { id: "descuento", emoji: "🎟️", title: "10% de descuento", weight: 15 },
+        {
+          id: "gran-premio",
+          emoji: "🏆",
+          title: "¡Gran premio sorpresa!",
+          description: "Pregunta en el stand por tu premio especial.",
+          weight: 5,
+        },
+      ],
+    },
     autoRotate: true,
     active: true,
     assetVersion: "v2",

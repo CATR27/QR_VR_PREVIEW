@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { ModelViewerElement } from "@google/model-viewer";
-import type { ExperienceAR, ExperienceEnvironment } from "@/lib/experiences/types";
+import type { ExperienceAR, ExperienceEnvironment, ExperienceGame } from "@/lib/experiences/types";
+import BurstGame from "./BurstGame";
 import {
   useIsInAppBrowser,
   useModelViewerDefined,
@@ -15,6 +16,8 @@ type Props = {
   poster?: string | null;
   environment: ExperienceEnvironment;
   ar: ExperienceAR;
+  game?: ExperienceGame;
+  slug: string;
   autoRotate: boolean;
 };
 
@@ -36,6 +39,8 @@ export default function ModelViewer({
   poster,
   environment,
   ar,
+  game,
+  slug,
   autoRotate,
 }: Props) {
   const viewerRef = useRef<ModelViewerElement>(null);
@@ -154,6 +159,16 @@ export default function ModelViewer({
           >
             <span aria-hidden="true">🎃</span> Ver en tu espacio
           </button>
+
+          {game?.enabled && status.kind === "ready" && (
+            <BurstGame
+              viewerRef={viewerRef}
+              game={game}
+              slug={slug}
+              arPresenting={arState === "presenting"}
+              reducedMotion={reducedMotion}
+            />
+          )}
         </model-viewer>
       )}
 

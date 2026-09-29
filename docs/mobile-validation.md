@@ -26,6 +26,16 @@
 | `/pantalla/nada` → 404; `style=halloween` con png → 400 | OK |
 | Visor: en escritorio `canActivateAR = false`, no aparece el botón AR y se muestra la explicación | OK |
 
+### Tercera entrega: juego de reventar
+
+| Prueba (Chrome escritorio, pulsación simulada) | Resultado |
+|---|---|
+| Pulsación sobre el modelo → anillo de carga, modelo se infla y tiembla → explota → tarjeta con premio y código | OK |
+| Pulsación fuera del modelo no inicia nada (prueba de impacto) | OK |
+| Mover el dedo >12 px durante la carga la cancela y el modelo vuelve a su tamaño | OK |
+| «Reventarlo otra vez» restaura el modelo; la segunda vez muestra el mismo premio y código | OK |
+| Sin errores de consola (tras el parche de `onUpdateScene` de model-viewer 4.3.1) | OK |
+
 **La AR no está probada todavía**: sólo se puede validar en teléfonos reales.
 
 ## Pendiente (requiere dispositivos reales)
@@ -33,7 +43,8 @@
 | Entorno | Qué comprobar |
 |---|---|
 | iPhone, Safari | Escanear QR, carga, girar/zoom, botón «Ver en tu espacio» → Quick Look (USDZ generado al vuelo), tamaño ~30 cm, apoyo en el suelo |
-| Android, Chrome | Lo mismo; anotar si abre WebXR o Scene Viewer |
+| Android, Chrome | Lo mismo; anotar si abre WebXR o Scene Viewer. En WebXR: botón «Mantén para reventar», explosión, premio, vibración y sonido |
+| Cualquier celular, visor 3D | Mantener presionado con el dedo real (sin menú contextual ni selección de texto) |
 | Pantalla del evento | QR escaneable a la distancia real del público, con la iluminación del lugar |
 | Red móvil lenta | Indicador de carga (~9.6 MB en total: 2.1 MB modelo + 7.5 MB HDR) |
 | Navegador dentro de apps (WhatsApp, Instagram) | Que el visor funcione |

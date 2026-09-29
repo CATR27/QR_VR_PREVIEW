@@ -58,6 +58,14 @@ Abrir `http://IP_DE_TU_PC:3000/` en la PC y escanear el QR con el teléfono. El 
 
 El QR de Halloween también se descarga en `/api/qr/pumpkin-witch-droid?format=svg&style=halloween` (para imprimir).
 
+## Juego: reventar al personaje y ganar un premio
+
+- **Visor 3D (todos los celulares):** mantener presionado 1 s sobre el personaje. Si el dedo se mueve (girar la cámara) o entra un segundo dedo (zoom), se cancela.
+- **AR de Android (WebXR):** botón «🎃 Mantén para reventar» (tocar el modelo en AR sirve para moverlo).
+- **AR de iPhone (Quick Look):** no es posible; es un visor nativo de Apple y la web no recibe los toques.
+
+Premios, pesos y prefijo del código: `game` en `src/lib/experiences/local-catalog.ts` (**los actuales son de ejemplo**). El sorteo es al azar por peso, en el navegador; el premio queda guardado en ese navegador (`localStorage`) para que recargar no dé otro. **No es una protección real**: modo incógnito u otro navegador permiten jugar de nuevo, y los códigos no se validan en un servidor. Si hace falta stock limitado o códigos únicos verificables, se necesita base de datos (fase 2 del plan).
+
 ## Añadir otro modelo
 
 1. Optimizar y escalar el GLB (ver `asset-pipeline.md`) y copiarlo a `public/models/<slug>/model-v1.glb`.

@@ -79,3 +79,38 @@ body {
   }
   .hw-bat { display: none; }
 }
+
+/* ───── Explosión del juego ───── */
+@keyframes hw-particle {
+  0% { transform: translate(-50%, -50%) scale(0.2) rotate(0deg); opacity: 1; }
+  70% { opacity: 1; }
+  100% {
+    transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty) + 140px)) scale(1) rotate(var(--rot));
+    opacity: 0;
+  }
+}
+@keyframes hw-burst-flash {
+  0% { width: 0; height: 0; opacity: 1; }
+  100% { width: 520px; height: 520px; opacity: 0; }
+}
+@keyframes hw-boo {
+  0% { transform: translate(-50%, -50%) scale(0.2) rotate(-12deg); opacity: 0; }
+  30% { transform: translate(-50%, -50%) scale(1.3) rotate(6deg); opacity: 1; }
+  100% { transform: translate(-50%, -160%) scale(1) rotate(0deg); opacity: 0; }
+}
+@keyframes hw-prize-in {
+  0% { transform: scale(0.6) rotate(-4deg); opacity: 0; }
+  70% { transform: scale(1.05) rotate(1deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); }
+}
+.hw-particle { animation: hw-particle 1.4s cubic-bezier(0.15, 0.7, 0.4, 1) both; }
+.hw-burst-flash {
+  background: radial-gradient(circle, #fde047 0%, #f97316 35%, #7c3aed55 60%, transparent 70%);
+  animation: hw-burst-flash 0.7s ease-out both;
+}
+.hw-boo { animation: hw-boo 1.1s ease-out both; text-shadow: 0 0 20px #000, 0 0 40px #ea580c; }
+.hw-prize-in { animation: hw-prize-in 0.5s ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hw-particle, .hw-burst-flash, .hw-boo, .hw-prize-in { animation-duration: 0.01s; }
+}

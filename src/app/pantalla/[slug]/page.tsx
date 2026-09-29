@@ -24,7 +24,7 @@ export async function generateMetadata({
 const STEPS = [
   { icon: "📱", text: "Abre la cámara de tu celular" },
   { icon: "🎯", text: "Apunta al código QR" },
-  { icon: "🎃", text: "Toca «Ver en tu espacio»" },
+  { icon: "🎃", text: "Revienta al personaje y gana un premio" },
 ];
 
 export default async function DisplayPage({ params }: PageProps<"/pantalla/[slug]">) {
@@ -51,7 +51,7 @@ export default async function DisplayPage({ params }: PageProps<"/pantalla/[slug
           </h1>
           <p className="max-w-[28ch] text-[clamp(1.1rem,3vh,2.2rem)] font-semibold leading-tight text-orange-100">
             Escanea y trae al <span className="text-orange-400">{experience.name}</span> a tu mundo
-            en realidad aumentada
+            en realidad aumentada… <span className="text-orange-400">¡y revienta para ganar un premio! 🎁</span>
           </p>
           <ol className="flex flex-col gap-[1.6vh]">
             {STEPS.map((step, i) => (

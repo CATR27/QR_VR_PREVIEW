@@ -40,6 +40,8 @@ export default async function ExperiencePage({
           poster={experience.posterUrl}
           environment={experience.environment}
           ar={experience.ar}
+          game={experience.game}
+          slug={experience.slug}
           autoRotate={experience.autoRotate}
         />
       ) : (
