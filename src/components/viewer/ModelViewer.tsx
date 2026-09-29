@@ -1,14 +1,20 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ModelViewerElement } from "@google/model-viewer";
-import type { ExperienceEnvironment } from "@/lib/experiences/types";
+import type { ExperienceAR, ExperienceEnvironment } from "@/lib/experiences/types";
+import {
+  useIsInAppBrowser,
+  useModelViewerDefined,
+  usePrefersReducedMotion,
+} from "./hooks";
 
 type Props = {
   src: string;
   alt: string;
   poster?: string | null;
   environment: ExperienceEnvironment;
+  ar: ExperienceAR;
   autoRotate: boolean;
 };
 
@@ -17,52 +23,30 @@ type Status =
   | { kind: "ready" }
   | { kind: "error"; message: string };
 
+/** Lo que sabemos de la AR: nunca afirmamos que se colocó si el visor no lo confirma. */
+type ARState = "unknown" | "available" | "unavailable" | "presenting" | "failed";
+
 type ProgressEvent = CustomEvent<{ totalProgress: number }>;
 type ErrorEvent = CustomEvent<{ type?: string }>;
-
-function subscribeReducedMotion(onChange: () => void) {
-  const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-  mq.addEventListener("change", onChange);
-  return () => mq.removeEventListener("change", onChange);
-}
-
-function usePrefersReducedMotion() {
-  return useSyncExternalStore(
-    subscribeReducedMotion,
-    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-    () => false,
-  );
-}
+type ARStatusEvent = CustomEvent<{ status: string }>;
 
 export default function ModelViewer({
   src,
   alt,
   poster,
   environment,
+  ar,
   autoRotate,
 }: Props) {
   const viewerRef = useRef<ModelViewerElement>(null);
-  const [defined, setDefined] = useState(false);
-  const [defineError, setDefineError] = useState(false);
+  const defineState = useModelViewerDefined();
   const [attempt, setAttempt] = useState(0);
   const [status, setStatus] = useState<Status>({ kind: "loading", progress: null });
+  const [arState, setArState] = useState<ARState>("unknown");
+  const [copied, setCopied] = useState(false);
   const reducedMotion = usePrefersReducedMotion();
-
-  // Registrar el custom element sólo en el navegador.
-  useEffect(() => {
-    let cancelled = false;
-    import("@google/model-viewer")
-      .then(() => customElements.whenDefined("model-viewer"))
-      .then(() => {
-        if (!cancelled) setDefined(true);
-      })
-      .catch(() => {
-        if (!cancelled) setDefineError(true);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const inAppBrowser = useIsInAppBrowser();
+  const defined = defineState === "ready";
 
   useEffect(() => {
     const el = viewerRef.current;
@@ -73,7 +57,10 @@ export default function ModelViewer({
       // model-viewer emite un progress final incluso después de un error: no pisar "ready" ni "error".
       setStatus((s) => (s.kind === "loading" ? { kind: "loading", progress: p } : s));
     };
-    const onLoad = () => setStatus({ kind: "ready" });
+    const onLoad = () => {
+      setStatus({ kind: "ready" });
+      if (ar.enabled) setArState(el.canActivateAR ? "available" : "unavailable");
+    };
     const onError = (e: Event) => {
       const type = (e as ErrorEvent).detail?.type;
       setStatus({
@@ -84,23 +71,40 @@ export default function ModelViewer({
             : "No se pudo cargar el modelo o el entorno.",
       });
     };
+    const onARStatus = (e: Event) => {
+      const s = (e as ARStatusEvent).detail.status;
+      if (s === "session-started" || s === "object-placed") setArState("presenting");
+      else if (s === "failed") setArState("failed");
+      else if (s === "not-presenting") setArState("available");
+    };
 
     el.addEventListener("progress", onProgress);
     el.addEventListener("load", onLoad);
     el.addEventListener("error", onError);
+    el.addEventListener("ar-status", onARStatus);
     return () => {
       el.removeEventListener("progress", onProgress);
       el.removeEventListener("load", onLoad);
       el.removeEventListener("error", onError);
+      el.removeEventListener("ar-status", onARStatus);
     };
-  }, [defined, attempt]);
+  }, [defined, attempt, ar.enabled]);
 
   const retry = () => {
     setStatus({ kind: "loading", progress: null });
     setAttempt((n) => n + 1);
   };
 
-  if (defineError) {
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
+  };
+
+  if (defineState === "error") {
     return (
       <Overlay>
         <p>No se pudo iniciar el visor 3D en este navegador.</p>
@@ -118,8 +122,13 @@ export default function ModelViewer({
           key={attempt}
           ref={viewerRef}
           src={src}
+          ios-src={ar.usdzUrl ?? undefined}
           alt={alt}
           poster={poster ?? undefined}
+          ar={ar.enabled}
+          ar-modes="webxr scene-viewer quick-look"
+          ar-placement={ar.placement}
+          ar-scale={ar.allowScaling ? "auto" : "fixed"}
           camera-controls
           touch-action="pan-y"
           interaction-prompt="auto"
@@ -136,20 +145,56 @@ export default function ModelViewer({
           min-camera-orbit="auto 10deg auto"
           max-camera-orbit="auto 95deg auto"
           className="block h-full w-full bg-neutral-950"
-        />
+        >
+          {/* model-viewer sólo muestra este botón si el dispositivo puede abrir AR. */}
+          <button
+            slot="ar-button"
+            type="button"
+            className="absolute bottom-16 left-1/2 flex min-h-14 -translate-x-1/2 items-center gap-2 rounded-full bg-orange-500 px-7 text-lg font-bold text-black shadow-[0_0_30px_rgba(249,115,22,0.7)] hover:bg-orange-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            <span aria-hidden="true">🎃</span> Ver en tu espacio
+          </button>
+        </model-viewer>
+      )}
+
+      {status.kind === "ready" && arState === "unavailable" && (
+        <div className="absolute inset-x-4 bottom-14 mx-auto max-w-md rounded-2xl bg-black/70 p-4 text-center text-sm text-white backdrop-blur">
+          {inAppBrowser ? (
+            <>
+              <p>
+                Para verlo en realidad aumentada, abre este enlace en{" "}
+                <strong>Safari</strong> (iPhone) o <strong>Chrome</strong> (Android).
+              </p>
+              <button type="button" onClick={copyLink} className={`${buttonClass} mt-3`}>
+                {copied ? "¡Enlace copiado!" : "Copiar enlace"}
+              </button>
+            </>
+          ) : (
+            <p>
+              La realidad aumentada funciona en iPhone/iPad (Safari) y en Android
+              compatibles (Chrome). Aquí puedes girarlo en 3D.
+            </p>
+          )}
+        </div>
+      )}
+
+      {arState === "failed" && (
+        <div
+          role="alert"
+          className="absolute inset-x-4 bottom-14 mx-auto max-w-md rounded-2xl bg-black/70 p-4 text-center text-sm text-white backdrop-blur"
+        >
+          No se pudo abrir la realidad aumentada en este dispositivo. Puedes seguir
+          viéndolo en 3D.
+        </div>
       )}
 
       {status.kind === "loading" && (
         <Overlay passive>
-          <div
-            role="status"
-            aria-live="polite"
-            className="flex flex-col items-center gap-3"
-          >
+          <div role="status" aria-live="polite" className="flex flex-col items-center gap-3">
             <span className="h-10 w-10 animate-spin rounded-full border-4 border-white/20 border-t-orange-400 motion-reduce:animate-none" />
             <span>
               Cargando modelo
-              {status.progress !== null ? ` ${Math.round(status.progress * 100)}%` : "…"}
+              {status.progress ? ` ${Math.round(status.progress * 100)}%` : "…"}
             </span>
           </div>
         </Overlay>

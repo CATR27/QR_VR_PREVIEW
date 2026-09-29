@@ -50,11 +50,17 @@ npm run build
 APP_ORIGIN=http://IP_DE_TU_PC:3000 npm start
 ```
 
-Abrir `http://IP_DE_TU_PC:3000/` en la PC y escanear el QR con el teléfono. El visor 3D no requiere HTTPS (sólo la AR lo necesitaba), pero **no imprimas** un QR con una IP local.
+Abrir `http://IP_DE_TU_PC:3000/` en la PC y escanear el QR con el teléfono. El visor 3D funciona así, pero **la AR necesita HTTPS público** (pruébala en la URL de Vercel), y **no imprimas** un QR con una IP local.
+
+## Pantalla de exhibición
+
+`/pantalla/pumpkin-witch-droid` es la página para la pantalla del evento: QR de Halloween grande, animaciones y el modelo girando. Abrirla en el navegador de la pantalla y pulsar **Pantalla completa** (arriba a la derecha). Diseñada para pantallas horizontales; en vertical se apilan el texto y el QR y se oculta el modelo.
+
+El QR de Halloween también se descarga en `/api/qr/pumpkin-witch-droid?format=svg&style=halloween` (para imprimir).
 
 ## Añadir otro modelo
 
-1. Optimizar el GLB (ver `asset-pipeline.md`) y copiarlo a `public/models/<slug>/model-v1.glb`.
+1. Optimizar y escalar el GLB (ver `asset-pipeline.md`) y copiarlo a `public/models/<slug>/model-v1.glb`.
 2. Añadir una entrada en `src/lib/experiences/local-catalog.ts`.
 3. `npm run build`. Las rutas se generan desde el catálogo; cualquier slug que no esté ahí responde 404.
 

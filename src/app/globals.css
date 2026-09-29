@@ -13,3 +13,69 @@ body {
   color: #ededed;
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
+
+/* ───── Pantalla de exhibición de Halloween ───── */
+.hw-sky {
+  background:
+    radial-gradient(1px 1px at 12% 18%, #fff8 50%, transparent 51%),
+    radial-gradient(1px 1px at 28% 8%, #fff9 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 44% 22%, #fffa 50%, transparent 51%),
+    radial-gradient(1px 1px at 63% 12%, #fff8 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 78% 30%, #fff9 50%, transparent 51%),
+    radial-gradient(1px 1px at 90% 6%, #fff8 50%, transparent 51%),
+    radial-gradient(1px 1px at 6% 40%, #fff7 50%, transparent 51%),
+    radial-gradient(1px 1px at 55% 38%, #fff6 50%, transparent 51%),
+    radial-gradient(ellipse 80% 60% at 50% 110%, #ea580c33, transparent 70%),
+    radial-gradient(ellipse 120% 90% at 50% 0%, #2e1065 0%, #12051f 55%, #05010a 100%);
+}
+
+@keyframes hw-twinkle { 50% { opacity: 0.4; } }
+@keyframes hw-fly {
+  0% { transform: translate(-15vw, 0) scale(var(--s, 1)); }
+  25% { transform: translate(25vw, -6vh) scale(var(--s, 1)); }
+  50% { transform: translate(55vw, 4vh) scale(var(--s, 1)); }
+  75% { transform: translate(85vw, -8vh) scale(var(--s, 1)); }
+  100% { transform: translate(118vw, 0) scale(var(--s, 1)); }
+}
+@keyframes hw-flap { 50% { transform: scaleY(0.35); } }
+@keyframes hw-float { 50% { transform: translateY(-14px); } }
+@keyframes hw-ghost {
+  0%, 100% { transform: translate(0, 0) rotate(-4deg); opacity: 0.75; }
+  50% { transform: translate(30px, -24px) rotate(4deg); opacity: 0.95; }
+}
+@keyframes hw-fog { to { transform: translateX(-50%); } }
+@keyframes hw-flicker {
+  0%, 19%, 22%, 62%, 64%, 100% { opacity: 1; text-shadow: 0 0 12px #f97316, 0 0 40px #ea580c; }
+  20%, 63% { opacity: 0.55; text-shadow: none; }
+}
+@keyframes hw-glow {
+  0%, 100% { box-shadow: 0 0 25px 4px #f9731688, 0 0 70px 10px #7c3aed55; }
+  50% { box-shadow: 0 0 45px 10px #f97316cc, 0 0 110px 25px #7c3aed88; }
+}
+@keyframes hw-spider { 50% { transform: translateY(26px); } }
+@keyframes hw-candle {
+  0%, 100% { filter: drop-shadow(0 0 10px #f97316) brightness(1); }
+  40% { filter: drop-shadow(0 0 22px #fb923c) brightness(1.15); }
+  70% { filter: drop-shadow(0 0 6px #ea580c) brightness(0.9); }
+}
+@keyframes hw-arrow { 50% { transform: translateX(10px); } }
+
+.hw-twinkle { animation: hw-twinkle 4s ease-in-out infinite; }
+.hw-bat { animation: hw-fly var(--d, 16s) linear infinite; animation-delay: var(--delay, 0s); }
+.hw-bat-wings { animation: hw-flap 0.35s ease-in-out infinite; transform-origin: center 40%; }
+.hw-float { animation: hw-float 5s ease-in-out infinite; }
+.hw-ghost { animation: hw-ghost 7s ease-in-out infinite; }
+.hw-fog { animation: hw-fog var(--d, 40s) linear infinite; }
+.hw-flicker { animation: hw-flicker 5s linear infinite; }
+.hw-glow { animation: hw-glow 3s ease-in-out infinite; }
+.hw-spider { animation: hw-spider 4s ease-in-out infinite; }
+.hw-candle { animation: hw-candle 2.2s ease-in-out infinite; }
+.hw-arrow { animation: hw-arrow 1.2s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hw-twinkle, .hw-bat, .hw-bat-wings, .hw-float, .hw-ghost, .hw-fog,
+  .hw-flicker, .hw-glow, .hw-spider, .hw-candle, .hw-arrow {
+    animation: none;
+  }
+  .hw-bat { display: none; }
+}

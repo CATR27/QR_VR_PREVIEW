@@ -23,6 +23,12 @@ interface ModelViewerAttributes
   "min-camera-orbit"?: string;
   "max-camera-orbit"?: string;
   "field-of-view"?: string;
+  ar?: boolean;
+  "ar-modes"?: string;
+  "ar-placement"?: "floor" | "wall";
+  "ar-scale"?: "auto" | "fixed";
+  "ios-src"?: string;
+  "camera-target"?: string;
   loading?: "auto" | "lazy" | "eager";
   reveal?: "auto" | "manual";
 }

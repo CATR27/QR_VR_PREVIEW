@@ -26,6 +26,16 @@ export const experienceSchema = z.object({
   glbUrl: z.string().nullable(),
   posterUrl: z.string().nullable().optional(),
   environment: environmentSchema,
+  /** Alto real del GLB publicado, en metros (la geometría ya viene escalada). */
+  heightMeters: z.number().positive(),
+  ar: z.object({
+    enabled: z.boolean(),
+    placement: z.enum(["floor", "wall"]),
+    /** Permitir que el usuario agrande/achique el modelo en AR. */
+    allowScaling: z.boolean(),
+    /** USDZ explícito para iOS; si falta, model-viewer lo genera desde el GLB. */
+    usdzUrl: z.string().nullable(),
+  }),
   autoRotate: z.boolean(),
   active: z.boolean(),
   assetVersion: z.string(),
@@ -33,3 +43,4 @@ export const experienceSchema = z.object({
 
 export type Experience = z.infer<typeof experienceSchema>;
 export type ExperienceEnvironment = z.infer<typeof environmentSchema>;
+export type ExperienceAR = Experience["ar"];

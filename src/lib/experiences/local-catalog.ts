@@ -6,18 +6,25 @@ const rawCatalog: unknown[] = [
     slug: "pumpkin-witch-droid",
     name: "Pumpkin Witch Droid",
     description:
-      "Personaje de Halloween creado en Meshy. Gíralo con el dedo o el ratón y acerca con pellizco o rueda.",
-    glbUrl: "/models/pumpkin-witch-droid/model-v1.glb",
+      "Personaje de Halloween creado en Meshy. Gíralo, acércalo y colócalo en tu espacio con realidad aumentada.",
+    glbUrl: "/models/pumpkin-witch-droid/model-v2.glb",
     posterUrl: null,
     environment: {
       skyboxUrl: "/environments/satara-night/satara_night_2k.hdr",
-      skyboxHeight: "1.6m",
+      skyboxHeight: "0.25m",
       exposure: 1.4,
       credit: "HDRI “Satara Night” por Greg Zaal — Poly Haven (CC0)",
     },
+    heightMeters: 0.3,
+    ar: {
+      enabled: true,
+      placement: "floor",
+      allowScaling: true,
+      usdzUrl: null,
+    },
     autoRotate: true,
     active: true,
-    assetVersion: "v1",
+    assetVersion: "v2",
   },
 ];
 

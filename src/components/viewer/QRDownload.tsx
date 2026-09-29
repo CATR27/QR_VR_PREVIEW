@@ -33,6 +33,14 @@ export default function QRDownload({ slug, name, url, svgMarkup, printable }: Pr
           Descargar SVG
         </a>
       </div>
+      <div className="flex flex-wrap justify-center gap-2">
+        <a className={linkClass} href={`/api/qr/${slug}?format=svg&style=halloween`} download>
+          🎃 SVG Halloween
+        </a>
+        <a className={linkClass} href={`/pantalla/${slug}`}>
+          Modo pantalla
+        </a>
+      </div>
     </div>
   );
 }

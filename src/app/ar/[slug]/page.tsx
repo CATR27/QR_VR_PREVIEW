@@ -39,6 +39,7 @@ export default async function ExperiencePage({
           alt={`${experience.name} en 3D`}
           poster={experience.posterUrl}
           environment={experience.environment}
+          ar={experience.ar}
           autoRotate={experience.autoRotate}
         />
       ) : (
