@@ -27,6 +27,11 @@ const rawCatalog: unknown[] = [
       enabled: true,
       holdMs: 1000,
       codePrefix: "HW",
+      quickLookBanner: {
+        callToAction: "🎃 ¡Reventar y ganar!",
+        title: "Pumpkin Witch Droid",
+        subtitle: "Toca para reventarlo y ganar un premio",
+      },
       prizes: [
         { id: "dulces", emoji: "🍬", title: "Bolsa de dulces", weight: 50 },
         { id: "calcomania", emoji: "👻", title: "Calcomanía de Halloween", weight: 30 },

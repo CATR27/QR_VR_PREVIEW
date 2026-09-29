@@ -62,7 +62,7 @@ El QR de Halloween también se descarga en `/api/qr/pumpkin-witch-droid?format=s
 
 - **Visor 3D (todos los celulares):** mantener presionado 1 s sobre el personaje. Si el dedo se mueve (girar la cámara) o entra un segundo dedo (zoom), se cancela.
 - **AR de Android (WebXR):** botón «🎃 Mantén para reventar» (tocar el modelo en AR sirve para moverlo).
-- **AR de iPhone (Quick Look):** no es posible; es un visor nativo de Apple y la web no recibe los toques.
+- **AR de iPhone (Quick Look):** Safari de iOS no soporta WebXR y Quick Look es un visor nativo que no pasa los toques a la página. Se usa el **banner de acción de Quick Look** (función documentada por Apple): abajo en la AR aparece «🎃 ¡Reventar y ganar!»; al tocarlo Quick Look se cierra y la página revienta al personaje y muestra el premio. Textos del banner: `game.quickLookBanner` en el catálogo (los tres campos son obligatorios o iOS no muestra el banner). Con el banner, Quick Look desactiva su botón de foto.
 
 Premios, pesos y prefijo del código: `game` en `src/lib/experiences/local-catalog.ts` (**los actuales son de ejemplo**). El sorteo es al azar por peso, en el navegador; el premio queda guardado en ese navegador (`localStorage`) para que recargar no dé otro. **No es una protección real**: modo incógnito u otro navegador permiten jugar de nuevo, y los códigos no se validan en un servidor. Si hace falta stock limitado o códigos únicos verificables, se necesita base de datos (fase 2 del plan).
 

@@ -6,6 +6,7 @@ import type { ExperienceAR, ExperienceEnvironment, ExperienceGame } from "@/lib/
 import BurstGame from "./BurstGame";
 import {
   useIsInAppBrowser,
+  useIsIOS,
   useModelViewerDefined,
   usePrefersReducedMotion,
 } from "./hooks";
@@ -33,6 +34,22 @@ type ProgressEvent = CustomEvent<{ totalProgress: number }>;
 type ErrorEvent = CustomEvent<{ type?: string }>;
 type ARStatusEvent = CustomEvent<{ status: string }>;
 
+/**
+ * En iPhone la AR es Quick Look (visor nativo) y la página no recibe toques. Su banner de
+ * acción sí: model-viewer copia este #hash del src al USDZ que genera y, al tocar el botón,
+ * Quick Look se cierra y emite "quick-look-button-tapped". El hash no viaja en la petición del GLB.
+ */
+function withQuickLookBanner(src: string, game?: ExperienceGame): string {
+  if (!game?.enabled) return src;
+  const { callToAction, title, subtitle } = game.quickLookBanner;
+  const params = [
+    `callToAction=${encodeURIComponent(callToAction)}`,
+    `checkoutTitle=${encodeURIComponent(title)}`,
+    `checkoutSubtitle=${encodeURIComponent(subtitle)}`,
+  ];
+  return `${src.split("#")[0]}#${params.join("&")}`;
+}
+
 export default function ModelViewer({
   src,
   alt,
@@ -51,6 +68,7 @@ export default function ModelViewer({
   const [copied, setCopied] = useState(false);
   const reducedMotion = usePrefersReducedMotion();
   const inAppBrowser = useIsInAppBrowser();
+  const isIOS = useIsIOS();
   const defined = defineState === "ready";
 
   useEffect(() => {
@@ -126,7 +144,7 @@ export default function ModelViewer({
         <model-viewer
           key={attempt}
           ref={viewerRef}
-          src={src}
+          src={withQuickLookBanner(src, game)}
           ios-src={ar.usdzUrl ?? undefined}
           alt={alt}
           poster={poster ?? undefined}
@@ -135,7 +153,7 @@ export default function ModelViewer({
           ar-placement={ar.placement}
           ar-scale={ar.allowScaling ? "auto" : "fixed"}
           camera-controls
-          touch-action="pan-y"
+          touch-action="none"
           interaction-prompt="auto"
           auto-rotate={autoRotate && !reducedMotion}
           auto-rotate-delay={1500}
@@ -149,7 +167,7 @@ export default function ModelViewer({
           camera-orbit="0deg 80deg auto"
           min-camera-orbit="auto 10deg auto"
           max-camera-orbit="auto 95deg auto"
-          className="block h-full w-full bg-neutral-950"
+          className="block h-full w-full select-none bg-neutral-950 [-webkit-touch-callout:none] [-webkit-user-select:none]"
         >
           {/* model-viewer sólo muestra este botón si el dispositivo puede abrir AR. */}
           <button
@@ -159,6 +177,12 @@ export default function ModelViewer({
           >
             <span aria-hidden="true">🎃</span> Ver en tu espacio
           </button>
+
+          {isIOS && game?.enabled && arState === "available" && (
+            <p className="pointer-events-none absolute inset-x-4 bottom-[8.25rem] text-center text-sm text-orange-100 [text-shadow:0_1px_4px_#000]">
+              En la AR toca <strong>«{game.quickLookBanner.callToAction}»</strong> abajo
+            </p>
+          )}
 
           {game?.enabled && status.kind === "ready" && (
             <BurstGame

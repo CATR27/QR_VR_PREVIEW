@@ -36,13 +36,22 @@
 | «Reventarlo otra vez» restaura el modelo; la segunda vez muestra el mismo premio y código | OK |
 | Sin errores de consola (tras el parche de `onUpdateScene` de model-viewer 4.3.1) | OK |
 
+### Cuarta entrega: iPhone con banner de Quick Look
+
+| Prueba (Chrome escritorio) | Resultado |
+|---|---|
+| El `src` del visor lleva `#callToAction=…&checkoutTitle=…&checkoutSubtitle=…` y el GLB sigue cargando desde `/models/pumpkin-witch-droid/model-v2.glb` | OK |
+| Evento `quick-look-button-tapped` simulado → explosión + tarjeta de premio | OK |
+| Pulsación larga con `touch-action="none"` y margen de 18 px (un movimiento de 14 px no la cancela) | OK |
+| Sin errores de consola | OK |
+
 **La AR no está probada todavía**: sólo se puede validar en teléfonos reales.
 
 ## Pendiente (requiere dispositivos reales)
 
 | Entorno | Qué comprobar |
 |---|---|
-| iPhone, Safari | Escanear QR, carga, girar/zoom, botón «Ver en tu espacio» → Quick Look (USDZ generado al vuelo), tamaño ~30 cm, apoyo en el suelo |
+| iPhone, Safari | Escanear QR, carga, girar/zoom, botón «Ver en tu espacio» → Quick Look (USDZ generado al vuelo), tamaño ~30 cm, apoyo en el suelo. **Banner «¡Reventar y ganar!» visible → tocarlo cierra la AR → explosión y premio en la página.** Mantener presionado en el visor 3D (sin lupa ni menú) |
 | Android, Chrome | Lo mismo; anotar si abre WebXR o Scene Viewer. En WebXR: botón «Mantén para reventar», explosión, premio, vibración y sonido |
 | Cualquier celular, visor 3D | Mantener presionado con el dedo real (sin menú contextual ni selección de texto) |
 | Pantalla del evento | QR escaneable a la distancia real del público, con la iluminación del lugar |

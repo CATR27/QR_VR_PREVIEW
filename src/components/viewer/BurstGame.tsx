@@ -27,7 +27,9 @@ type Particle = {
   delay: number;
 };
 
-const MOVE_TOLERANCE_PX = 12;
+const MOVE_TOLERANCE_PX = 18; // el temblor natural del dedo no debe cancelar la carga
+/** Quick Look tarda un momento en cerrarse; sin esta pausa la animación empieza sin verse. */
+const QUICK_LOOK_RETURN_DELAY_MS = 350;
 const BURST_MS = 1100;
 const PARTICLE_EMOJIS = ["🍬", "🍭", "🎃", "👻", "🦇", "🍫", "🕷️", "⭐", "💀", "🍬"];
 const IDLE_SCALE = "1 1 1";
@@ -119,8 +121,9 @@ export default function BurstGame({ viewerRef, game, slug, arPresenting, reduced
     setPhaseBoth("idle");
   }, [restoreModel]);
 
-  const burst = useCallback(() => {
+  const burst = useCallback((at?: Point) => {
     stopLoop();
+    if (at) setPoint(at);
     setPhaseBoth("bursting");
     setProgress(0);
     setParticles(makeParticles(reducedMotion ? 12 : 42));
@@ -226,6 +229,50 @@ export default function BurstGame({ viewerRef, game, slug, arPresenting, reduced
       el.removeEventListener("contextmenu", onContextMenu);
     };
   }, [arPresenting, cancelCharge, startCharge, viewerRef]);
+
+  // iPhone: el botón del banner de Quick Look cierra la AR y revienta al personaje en la página.
+  useEffect(() => {
+    const el = viewerRef.current;
+    if (!el) return;
+    let timer: number | null = null;
+    let pendingVisible: (() => void) | null = null;
+
+    const fire = () => {
+      if (phaseRef.current !== "idle") return;
+      try {
+        // Sin gesto en la página Safari puede negarse; entonces la explosión va en silencio.
+        audioRef.current ??= new AudioContext();
+        void audioRef.current.resume();
+      } catch {
+        audioRef.current = null;
+      }
+      const rect = el.getBoundingClientRect();
+      burst({ x: rect.width / 2, y: rect.height * 0.5 });
+    };
+    const schedule = () => {
+      timer = window.setTimeout(fire, QUICK_LOOK_RETURN_DELAY_MS);
+    };
+    const onBannerTapped = () => {
+      if (document.visibilityState === "visible") {
+        schedule();
+        return;
+      }
+      pendingVisible = () => {
+        if (document.visibilityState !== "visible") return;
+        document.removeEventListener("visibilitychange", pendingVisible!);
+        pendingVisible = null;
+        schedule();
+      };
+      document.addEventListener("visibilitychange", pendingVisible);
+    };
+
+    el.addEventListener("quick-look-button-tapped", onBannerTapped);
+    return () => {
+      el.removeEventListener("quick-look-button-tapped", onBannerTapped);
+      if (pendingVisible) document.removeEventListener("visibilitychange", pendingVisible);
+      if (timer !== null) clearTimeout(timer);
+    };
+  }, [burst, viewerRef]);
 
   // Al entrar o salir de la AR, abortar lo que estuviera a medias.
   useEffect(() => {

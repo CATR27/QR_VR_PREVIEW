@@ -31,6 +31,15 @@ export const gameSchema = z.object({
   /** Milisegundos que hay que mantener presionado para reventar el modelo. */
   holdMs: z.number().int().min(300).max(5000),
   codePrefix: z.string().regex(/^[A-Z0-9]{1,6}$/),
+  /**
+   * Banner de AR Quick Look (iPhone): su botón cierra la AR y dispara la explosión en la página.
+   * Los tres campos son obligatorios; si falta uno, iOS no muestra el banner.
+   */
+  quickLookBanner: z.object({
+    callToAction: z.string().min(1).max(30),
+    title: z.string().min(1),
+    subtitle: z.string().min(1),
+  }),
   prizes: z.array(prizeSchema).min(1),
 });
 

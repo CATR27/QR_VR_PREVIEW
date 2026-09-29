@@ -44,6 +44,18 @@ const noopSubscribe = () => () => {};
 // Navegadores integrados de redes sociales, donde la AR suele no estar disponible.
 const IN_APP_BROWSER = /Instagram|FBAN|FBAV|FB_IAB|Line\/|TikTok|musical_ly|Snapchat|LinkedInApp/i;
 
+function detectIOS(): boolean {
+  // El iPad con iPadOS se presenta como Mac; se distingue por la pantalla táctil.
+  return (
+    /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  );
+}
+
+export function useIsIOS(): boolean {
+  return useSyncExternalStore(noopSubscribe, detectIOS, () => false);
+}
+
 export function useIsInAppBrowser(): boolean {
   return useSyncExternalStore(
     noopSubscribe,
