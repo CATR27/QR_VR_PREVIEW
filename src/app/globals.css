@@ -80,6 +80,57 @@ body {
   .hw-bat { display: none; }
 }
 
+/* ───── Escáner: invocación del personaje ───── */
+@keyframes hw-portal {
+  0% { transform: translate(-50%, -50%) scale(0.05) rotate(0deg); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(var(--end, 3)) rotate(var(--spin, 180deg)); opacity: 0; }
+}
+@keyframes hw-rise {
+  0% { transform: translateY(45%) scale(0.05) rotate(-25deg); opacity: 0; filter: brightness(3) drop-shadow(0 0 40px #f97316); }
+  55% { transform: translateY(-4%) scale(1.18) rotate(4deg); opacity: 1; filter: brightness(1.6) drop-shadow(0 0 50px #f97316); }
+  78% { transform: translateY(0) scale(0.95) rotate(-1deg); filter: brightness(1.15) drop-shadow(0 0 30px #7c3aed); }
+  100% { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; filter: brightness(1) drop-shadow(0 0 22px #f9731699); }
+}
+@keyframes hw-lightning {
+  0%, 100% { opacity: 0; }
+  8% { opacity: 0.95; }
+  14% { opacity: 0.1; }
+  22% { opacity: 0.8; }
+  40% { opacity: 0; }
+}
+@keyframes hw-mist {
+  0% { transform: translateY(30%); opacity: 0; }
+  40% { opacity: 1; }
+  100% { transform: translateY(-10%); opacity: 0.55; }
+}
+@keyframes hw-vignette { to { opacity: 1; } }
+@keyframes hw-lock {
+  0%, 100% { stroke-width: 3; filter: drop-shadow(0 0 6px #f97316); }
+  50% { stroke-width: 6; filter: drop-shadow(0 0 18px #fde047); }
+}
+@keyframes hw-scanline {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(100%); }
+}
+@keyframes hw-title-in {
+  0% { transform: scale(0.4) rotate(-6deg); opacity: 0; letter-spacing: 0.3em; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; letter-spacing: 0; }
+}
+.hw-portal { animation: hw-portal var(--d, 1.6s) ease-out both; animation-delay: var(--delay, 0s); }
+.hw-rise { animation: hw-rise 1.7s cubic-bezier(0.2, 0.9, 0.3, 1.1) both; }
+.hw-lightning { animation: hw-lightning 0.9s linear both; }
+.hw-mist { animation: hw-mist 2.4s ease-out both; }
+.hw-vignette { opacity: 0; animation: hw-vignette 0.8s ease-out forwards; }
+.hw-lock { animation: hw-lock 0.5s ease-in-out infinite; }
+.hw-scanline { animation: hw-scanline 2.2s linear infinite; }
+.hw-title-in { animation: hw-title-in 0.8s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hw-portal, .hw-lightning, .hw-lock, .hw-scanline { animation: none; opacity: 0; }
+  .hw-rise, .hw-mist, .hw-title-in { animation-duration: 0.01s; }
+}
+
 /* ───── Explosión del juego ───── */
 @keyframes hw-particle {
   0% { transform: translate(-50%, -50%) scale(0.2) rotate(0deg); opacity: 1; }

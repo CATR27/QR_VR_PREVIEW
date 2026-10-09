@@ -60,12 +60,20 @@ export default async function ExperiencePage({
             Arrastra para girar · pellizca o usa la rueda para acercar
           </p>
         </div>
-        <Link
-          href="/"
-          className="pointer-events-auto rounded-full bg-white/15 px-4 py-2 text-sm backdrop-blur hover:bg-white/25 focus-visible:outline-2 focus-visible:outline-white"
-        >
-          Inicio
-        </Link>
+        <div className="pointer-events-auto flex gap-2">
+          <Link
+            href="/escanear"
+            className="rounded-full bg-orange-500 px-4 py-2 text-sm font-semibold text-black hover:bg-orange-400 focus-visible:outline-2 focus-visible:outline-white"
+          >
+            📷 Escanear
+          </Link>
+          <Link
+            href="/"
+            className="rounded-full bg-white/15 px-4 py-2 text-sm backdrop-blur hover:bg-white/25 focus-visible:outline-2 focus-visible:outline-white"
+          >
+            Inicio
+          </Link>
+        </div>
       </header>
 
       <footer className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-3 pt-8 text-center text-xs text-white/70">

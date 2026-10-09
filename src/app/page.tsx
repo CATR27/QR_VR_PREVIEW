@@ -27,6 +27,13 @@ export default async function Home() {
           girarlo en su escenario 360°.
         </p>
 
+        <Link
+          href="/escanear"
+          className="hw-glow mt-6 inline-flex min-h-14 items-center gap-2 rounded-full bg-orange-500 px-8 text-lg font-bold text-black hover:bg-orange-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        >
+          <span aria-hidden="true">🎃</span> Abrir cámara y escanear
+        </Link>
+
         <ul className="mt-8 grid gap-6">
           {items.map((e) => (
             <li
