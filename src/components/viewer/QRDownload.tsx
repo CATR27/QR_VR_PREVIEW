@@ -4,12 +4,14 @@ type Props = {
   url: string;
   svgMarkup: string;
   printable: boolean;
+  /** Lado del símbolo QR a imprimir, en cm (debe coincidir con anchor.qrSizeMeters). */
+  printSizeCm: number;
 };
 
 const linkClass =
   "inline-flex min-h-11 items-center rounded-full border border-white/30 px-4 text-sm hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-white";
 
-export default function QRDownload({ slug, name, url, svgMarkup, printable }: Props) {
+export default function QRDownload({ slug, name, url, svgMarkup, printable, printSizeCm }: Props) {
   return (
     <div className="flex flex-col items-center gap-3">
       <div
@@ -36,6 +38,9 @@ export default function QRDownload({ slug, name, url, svgMarkup, printable }: Pr
       <div className="flex flex-wrap justify-center gap-2">
         <a className={linkClass} href={`/api/qr/${slug}?format=svg&style=halloween`} download>
           🎃 SVG Halloween
+        </a>
+        <a className={linkClass} href={`/api/qr/${slug}?format=svg&style=halloween&size=${printSizeCm}`} download>
+          🖨️ SVG para imprimir ({printSizeCm} cm)
         </a>
         <a className={linkClass} href={`/pantalla/${slug}`}>
           Modo pantalla

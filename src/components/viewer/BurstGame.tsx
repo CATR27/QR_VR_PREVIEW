@@ -6,8 +6,20 @@ import type { ExperienceGame } from "@/lib/experiences/types";
 import { patchARUpdateScene } from "./model-viewer-patches";
 import { drawPrize, loadSavedPrize, makePrizeCode, savePrize, type WonPrize } from "@/lib/prizes";
 
+/** Lo que el juego necesita del modelo en pantalla: <model-viewer> por defecto, o la escena three.js de la AR anclada. */
+export type BurstAdapter = {
+  /** Elemento que recibe los toques. */
+  target: HTMLElement;
+  hitTest(clientX: number, clientY: number): boolean;
+  /** k = factor de escala (1 → 1.3); shakeDeg = temblor en grados. */
+  setCharge(k: number, shakeDeg: number): void;
+  pop(): void;
+  restore(): void;
+};
+
 type Props = {
-  viewerRef: RefObject<ModelViewerElement | null>;
+  viewerRef?: RefObject<ModelViewerElement | null>;
+  adapter?: BurstAdapter;
   game: ExperienceGame;
   slug: string;
   /** En la AR de Android tocar el modelo lo arrastra, así que ahí se usa un botón. */
@@ -82,7 +94,7 @@ function playBurstSound(ctx: AudioContext) {
   boo.stop(now + 1.05);
 }
 
-export default function BurstGame({ viewerRef, game, slug, arPresenting, reducedMotion }: Props) {
+export default function BurstGame({ viewerRef, adapter, game, slug, arPresenting, reducedMotion }: Props) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [progress, setProgress] = useState(0);
   const [point, setPoint] = useState<Point>({ x: 0, y: 0 });
@@ -101,12 +113,31 @@ export default function BurstGame({ viewerRef, game, slug, arPresenting, reduced
     setPhase(p);
   };
 
+  const getAdapter = useCallback((): BurstAdapter | null => {
+    if (adapter) return adapter;
+    const el = viewerRef?.current;
+    if (!el) return null;
+    return {
+      target: el,
+      hitTest: (x, y) => el.positionAndNormalFromPoint(x, y) !== null,
+      setCharge: (k, shake) => {
+        el.scale = `${k} ${k} ${k}`;
+        el.orientation = `${shake}deg 0deg 0deg`;
+      },
+      pop: () => {
+        el.orientation = IDLE_ORIENTATION;
+        el.scale = "0.001 0.001 0.001";
+      },
+      restore: () => {
+        el.scale = IDLE_SCALE;
+        el.orientation = IDLE_ORIENTATION;
+      },
+    };
+  }, [adapter, viewerRef]);
+
   const restoreModel = useCallback(() => {
-    const el = viewerRef.current;
-    if (!el) return;
-    el.scale = IDLE_SCALE;
-    el.orientation = IDLE_ORIENTATION;
-  }, [viewerRef]);
+    getAdapter()?.restore();
+  }, [getAdapter]);
 
   const stopLoop = () => {
     if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
@@ -128,12 +159,8 @@ export default function BurstGame({ viewerRef, game, slug, arPresenting, reduced
     setProgress(0);
     setParticles(makeParticles(reducedMotion ? 12 : 42));
 
-    const el = viewerRef.current;
-    if (el) {
-      // "Reventar": el modelo desaparece de golpe (también dentro de la AR).
-      el.orientation = IDLE_ORIENTATION;
-      el.scale = "0.001 0.001 0.001";
-    }
+    // "Reventar": el modelo desaparece de golpe (también dentro de la AR).
+    getAdapter()?.pop();
     if (audioRef.current) playBurstSound(audioRef.current);
     navigator.vibrate?.([80, 40, 160]);
 
@@ -150,7 +177,7 @@ export default function BurstGame({ viewerRef, game, slug, arPresenting, reduced
     }
 
     burstTimerRef.current = window.setTimeout(() => setPhaseBoth("prize"), BURST_MS);
-  }, [game.codePrefix, game.prizes, reducedMotion, slug, viewerRef]);
+  }, [game.codePrefix, game.prizes, getAdapter, reducedMotion, slug]);
 
   const startCharge = useCallback(
     (at: Point, pointerId: number, clientX: number, clientY: number) => {
@@ -170,30 +197,29 @@ export default function BurstGame({ viewerRef, game, slug, arPresenting, reduced
       const tick = (now: number) => {
         const p = Math.min(1, (now - startRef.current.t) / game.holdMs);
         setProgress(p);
-        const el = viewerRef.current;
+        const model = getAdapter();
         // Inflar y temblar ~30 veces por segundo (cada cambio recalcula la escena).
-        if (el && now - lastModelUpdate > 33) {
+        if (model && now - lastModelUpdate > 33) {
           lastModelUpdate = now;
-          const k = 1 + 0.3 * p;
-          el.scale = `${k} ${k} ${k}`;
-          if (!reducedMotion) el.orientation = `${Math.sin(now / 25) * 10 * p}deg 0deg 0deg`;
+          model.setCharge(1 + 0.3 * p, reducedMotion ? 0 : Math.sin(now / 25) * 10 * p);
         }
         if (p >= 1) burst();
         else rafRef.current = requestAnimationFrame(tick);
       };
       rafRef.current = requestAnimationFrame(tick);
     },
-    [burst, game.holdMs, reducedMotion, viewerRef],
+    [burst, game.holdMs, getAdapter, reducedMotion],
   );
 
   useEffect(() => {
-    if (viewerRef.current) patchARUpdateScene(viewerRef.current);
-  }, [viewerRef]);
+    if (!adapter && viewerRef?.current) patchARUpdateScene(viewerRef.current);
+  }, [adapter, viewerRef]);
 
   // Visor 3D: mantener presionado sobre el propio modelo.
   useEffect(() => {
-    const el = viewerRef.current;
-    if (!el || arPresenting) return;
+    const model = getAdapter();
+    const el = model?.target;
+    if (!model || !el || arPresenting) return;
 
     const onPointerDown = (e: PointerEvent) => {
       if (!e.isPrimary) {
@@ -201,7 +227,7 @@ export default function BurstGame({ viewerRef, game, slug, arPresenting, reduced
         return;
       }
       if ((e.target as Element).closest("[data-game-ui]")) return;
-      if (el.positionAndNormalFromPoint(e.clientX, e.clientY) === null) return;
+      if (!model.hitTest(e.clientX, e.clientY)) return;
       const rect = el.getBoundingClientRect();
       startCharge({ x: e.clientX - rect.left, y: e.clientY - rect.top }, e.pointerId, e.clientX, e.clientY);
     };
@@ -228,12 +254,12 @@ export default function BurstGame({ viewerRef, game, slug, arPresenting, reduced
       el.removeEventListener("pointercancel", onPointerEnd);
       el.removeEventListener("contextmenu", onContextMenu);
     };
-  }, [arPresenting, cancelCharge, startCharge, viewerRef]);
+  }, [arPresenting, cancelCharge, getAdapter, startCharge]);
 
   // iPhone: el botón del banner de Quick Look cierra la AR y revienta al personaje en la página.
   useEffect(() => {
-    const el = viewerRef.current;
-    if (!el) return;
+    const el = viewerRef?.current;
+    if (!el || adapter) return;
     let timer: number | null = null;
     let pendingVisible: (() => void) | null = null;
 
@@ -272,7 +298,7 @@ export default function BurstGame({ viewerRef, game, slug, arPresenting, reduced
       if (pendingVisible) document.removeEventListener("visibilitychange", pendingVisible);
       if (timer !== null) clearTimeout(timer);
     };
-  }, [burst, viewerRef]);
+  }, [adapter, burst, viewerRef]);
 
   // Al entrar o salir de la AR, abortar lo que estuviera a medias.
   useEffect(() => {
@@ -295,7 +321,7 @@ export default function BurstGame({ viewerRef, game, slug, arPresenting, reduced
   };
 
   const arButtonDown = (e: React.PointerEvent<HTMLButtonElement>) => {
-    const el = viewerRef.current;
+    const el = getAdapter()?.target;
     if (!el) return;
     const rect = el.getBoundingClientRect();
     startCharge({ x: rect.width / 2, y: rect.height * 0.45 }, e.pointerId, e.clientX, e.clientY);

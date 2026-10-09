@@ -8,7 +8,8 @@ export type CameraError = "denied" | "unavailable" | "insecure" | "unknown";
 
 type Detector = { detect(source: ImageBitmapSource): Promise<{ rawValue: string; cornerPoints: { x: number; y: number }[] }[]> };
 
-const SCAN_INTERVAL_MS = 110; // ~9 fps: de sobra para un QR y no calienta el teléfono
+const SCAN_INTERVAL_MS = 110; // ~9 fps: de sobra para encontrar un QR y no calienta el teléfono
+const TRACK_INTERVAL_MS = 16; // siguiendo el QR se decodifica lo más rápido que dé el dispositivo
 const MAX_SIDE = 640; // se reduce el cuadro antes de decodificar
 
 async function createDetector(): Promise<Detector> {
@@ -44,6 +45,7 @@ export function useQrScan(videoRef: RefObject<HTMLVideoElement | null>, onHit: (
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const busyRef = useRef(false);
   const scanningRef = useRef(false);
+  const trackingRef = useRef(false);
   const tickRef = useRef<() => void>(() => {});
   const onHitRef = useRef(onHit);
   useEffect(() => {
@@ -86,7 +88,7 @@ export function useQrScan(videoRef: RefObject<HTMLVideoElement | null>, onHit: (
             const f = found[0];
             // Esquinas normalizadas 0..1 respecto al cuadro de video.
             const corners = (f.cornerPoints ?? []).map((p) => ({ x: p.x / w, y: p.y / h }));
-            scanningRef.current = false;
+            if (!trackingRef.current) scanningRef.current = false;
             onHitRef.current({ value: f.rawValue, corners });
           }
         }
@@ -96,7 +98,7 @@ export function useQrScan(videoRef: RefObject<HTMLVideoElement | null>, onHit: (
         busyRef.current = false;
       }
     }
-    if (scanningRef.current) timerRef.current = window.setTimeout(() => tickRef.current(), SCAN_INTERVAL_MS);
+    if (scanningRef.current) timerRef.current = window.setTimeout(() => tickRef.current(), trackingRef.current ? TRACK_INTERVAL_MS : SCAN_INTERVAL_MS);
   }, [videoRef]);
 
   useEffect(() => {
@@ -111,6 +113,15 @@ export function useQrScan(videoRef: RefObject<HTMLVideoElement | null>, onHit: (
   }, []);
 
   const pause = stopLoop;
+
+  /** Seguimiento continuo: cada detección se reporta y el bucle no se detiene. */
+  const setTracking = useCallback(
+    (on: boolean) => {
+      trackingRef.current = on;
+      if (on) resume();
+    },
+    [resume],
+  );
 
   const start = useCallback(async () => {
     setError(null);
@@ -163,5 +174,5 @@ export function useQrScan(videoRef: RefObject<HTMLVideoElement | null>, onHit: (
     };
   }, [stopCamera]);
 
-  return { start, stopCamera, pause, resume, error, active };
+  return { start, stopCamera, pause, resume, setTracking, error, active };
 }

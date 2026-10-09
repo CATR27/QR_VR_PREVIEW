@@ -60,3 +60,18 @@
 | QR impreso | Lectura y dominio correcto (con `APP_ORIGIN` HTTPS definitivo) |
 
 Registrar: dispositivo, sistema, navegador, fecha, versión del activo (`v2`) y resultado.
+
+## AR anclada al QR impreso (`/ar/<slug>`)
+
+El personaje se ancla al QR físico: se calcula la pose del QR con sus 4 esquinas (`src/lib/ar/pose.ts`) y se dibuja con three.js sobre el video (`src/components/scanner/arScene.ts`). Verificado sólo con una cámara simulada en Chrome de escritorio; **falta probarlo con el QR impreso en iPhone y Android.**
+
+### Antes de imprimir
+- Descarga el SVG exacto en la home (`🖨️ SVG para imprimir`) o `/api/qr/<slug>?format=svg&style=halloween&size=40`. El tamaño en cm es el del **símbolo** (sin zona blanca); `anchor.qrSizeMeters` en `local-catalog.ts` debe coincidir con lo impreso (hoy 0.40 m). Si imprimes otro tamaño, cámbialo ahí o el personaje saldrá mal escalado.
+- Impresión **mate**, contraste alto, zona blanca intacta, superficie plana, sin sol directo ni reflejos.
+- El dominio del QR no se puede cambiar una vez impreso: define `APP_ORIGIN` con el dominio definitivo y conserva la ruta `/ar/pumpkin-witch-droid`.
+- Distancia útil estimada con 40 cm: 1.5–4 m, de frente (menos de ~60° de inclinación).
+
+### Qué ajustar tras la prueba de campo
+- `anchor.modelHeightInQr` (tamaño del personaje respecto al QR) y `anchor.mount` (`wall` si el QR es vertical, `floor` si es horizontal).
+- `approximateIntrinsics(..., focalRatio = 0.8)` en `src/lib/ar/pose.ts`: si el personaje "flota" o se desplaza al acercarte/alejarte, probar 0.7–1.0.
+- Si hay temblor: subir `minCutoff` bajo / bajar `beta` en `OneEuro`. Si hay retraso al mover: lo contrario.

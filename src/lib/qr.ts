@@ -23,7 +23,7 @@ const HALLOWEEN = {
  * módulos oscuros sobre fondo claro, zona blanca de 4 módulos y corrección H para
  * la calabaza del centro (tapa ~5% del área; H tolera hasta ~30%).
  */
-export function renderHalloweenQRSvg(text: string): string {
+export function renderHalloweenQRSvg(text: string, printSymbolCm?: number): string {
   const qr = QRCode.create(text, { errorCorrectionLevel: "H" });
   const n = qr.modules.size;
   const isDark = (r: number, c: number) => qr.modules.get(r, c) === 1;
@@ -79,7 +79,9 @@ export function renderHalloweenQRSvg(text: string): string {
       <path d="M-6 2.5 L-4 4.5 L-2 3 L0 5 L2 3 L4 4.5 L6 2.5 L5 6.5 L-5 6.5 Z" fill="${HALLOWEEN.dark}"/>
     </g>`;
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${total} ${total}" shape-rendering="geometricPrecision"><rect width="${total}" height="${total}" fill="${HALLOWEEN.light}"/><g fill="${HALLOWEEN.dark}">${parts.join("")}</g>${finderSvg}${pumpkin}</svg>`;
+  // Para imprimir: el SÍMBOLO (sin zona blanca) mide `printSymbolCm`; el lienzo completo es proporcionalmente mayor.
+  const physical = printSymbolCm ? ` width="${((printSymbolCm * total) / n).toFixed(2)}cm" height="${((printSymbolCm * total) / n).toFixed(2)}cm"` : "";
+  return `<svg xmlns="http://www.w3.org/2000/svg"${physical} viewBox="0 0 ${total} ${total}" shape-rendering="geometricPrecision"><rect width="${total}" height="${total}" fill="${HALLOWEEN.light}"/><g fill="${HALLOWEEN.dark}">${parts.join("")}</g>${finderSvg}${pumpkin}</svg>`;
 }
 
 export async function renderQR(

@@ -28,6 +28,7 @@ export default async function ScanPage() {
         name: e.name,
         glbUrl: e.glbUrl,
         game: e.game,
+        anchor: e.anchor,
       }))}
     />
   );

@@ -25,10 +25,17 @@ export async function GET(
     return new Response("el estilo halloween sólo está disponible en svg", { status: 400 });
   }
 
+  // `size` (cm): tamaño impreso del símbolo QR; sólo para el SVG Halloween.
+  const sizeParam = search.get("size");
+  const sizeCm = sizeParam ? Number(sizeParam) : undefined;
+  if (sizeCm !== undefined && (!Number.isFinite(sizeCm) || sizeCm < 5 || sizeCm > 300 || style !== "halloween")) {
+    return new Response("size (cm) debe estar entre 5 y 300 y requiere style=halloween", { status: 400 });
+  }
+
   const url = buildExperienceUrl(getAppOrigin(), experience.slug);
   const body =
-    style === "halloween" ? renderHalloweenQRSvg(url) : await renderQR(url, format);
-  const suffix = style === "halloween" ? "-halloween" : "";
+    style === "halloween" ? renderHalloweenQRSvg(url, sizeCm) : await renderQR(url, format);
+  const suffix = (style === "halloween" ? "-halloween" : "") + (sizeCm ? `-${sizeCm}cm` : "");
 
   return new Response(typeof body === "string" ? body : new Uint8Array(body), {
     headers: {

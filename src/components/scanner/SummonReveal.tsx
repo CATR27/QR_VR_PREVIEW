@@ -5,13 +5,14 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import type { ModelViewerElement } from "@google/model-viewer";
 import BurstGame from "@/components/viewer/BurstGame";
 import { useModelViewerDefined } from "@/components/viewer/hooks";
-import type { ExperienceGame } from "@/lib/experiences/types";
+import type { ExperienceAnchor, ExperienceGame } from "@/lib/experiences/types";
 
 export type ScannerExperience = {
   slug: string;
   name: string;
   glbUrl: string | null;
   game?: ExperienceGame;
+  anchor: ExperienceAnchor;
 };
 
 type Props = {

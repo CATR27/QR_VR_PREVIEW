@@ -46,6 +46,7 @@ export default async function Home() {
                 url={e.url}
                 svgMarkup={e.svg}
                 printable={printable}
+                printSizeCm={Math.round(e.anchor.qrSizeMeters * 100)}
               />
               <div className="flex flex-1 flex-col gap-3">
                 <h2 className="text-xl font-semibold">{e.name}</h2>
@@ -54,7 +55,7 @@ export default async function Home() {
                   href={`/ar/${e.slug}`}
                   className="inline-flex min-h-12 w-fit items-center rounded-full bg-orange-500 px-6 font-semibold text-black hover:bg-orange-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                 >
-                  Abrir visor 3D
+                  Probar AR sobre el QR
                 </Link>
               </div>
             </li>

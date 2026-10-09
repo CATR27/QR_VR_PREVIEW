@@ -45,6 +45,8 @@ const rawCatalog: unknown[] = [
         },
       ],
     },
+    // El QR se imprime con el símbolo de 40 cm; el personaje mide ~1.75 veces el lado del QR.
+    anchor: { qrSizeMeters: 0.4, modelHeightInQr: 1.75, mount: "wall" },
     autoRotate: true,
     active: true,
     assetVersion: "v2",

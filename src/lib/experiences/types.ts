@@ -43,6 +43,15 @@ export const gameSchema = z.object({
   prizes: z.array(prizeSchema).min(1),
 });
 
+export const anchorSchema = z.object({
+  /** Lado del símbolo QR impreso en metros, SIN la zona blanca. Debe coincidir con lo impreso. */
+  qrSizeMeters: z.number().positive(),
+  /** Altura del personaje como múltiplo del lado del QR. */
+  modelHeightInQr: z.number().positive(),
+  /** "wall": QR vertical, el personaje sale hacia el espectador. "floor": QR horizontal, el personaje se para sobre él. */
+  mount: z.enum(["wall", "floor"]),
+});
+
 export const experienceSchema = z.object({
   id: z.string(),
   slug: slugSchema,
@@ -63,6 +72,7 @@ export const experienceSchema = z.object({
     usdzUrl: z.string().nullable(),
   }),
   game: gameSchema.optional(),
+  anchor: anchorSchema,
   autoRotate: z.boolean(),
   active: z.boolean(),
   assetVersion: z.string(),
@@ -71,5 +81,6 @@ export const experienceSchema = z.object({
 export type Experience = z.infer<typeof experienceSchema>;
 export type ExperienceEnvironment = z.infer<typeof environmentSchema>;
 export type ExperienceAR = Experience["ar"];
+export type ExperienceAnchor = z.infer<typeof anchorSchema>;
 export type ExperienceGame = z.infer<typeof gameSchema>;
 export type Prize = z.infer<typeof prizeSchema>;
